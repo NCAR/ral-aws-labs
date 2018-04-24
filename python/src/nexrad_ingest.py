@@ -71,6 +71,14 @@ def read_messages(queue):
     Read messages from the queue
     :return: None
     """
+
+    # we do not care about old messages, so purge the queue
+    queue.purge()
+
+    # create an S3 client so that we can download objects to files
+    s3 = boto3.client('s3')
+
+    # read messages forever
     s3 = boto3.client('s3')
     while True:
         messages = None
