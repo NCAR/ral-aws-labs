@@ -1,5 +1,5 @@
-import boto3
 import json
+import boto3
 
 # TODO: Change queue name
 QUEUE_NAME = '-incoming-radar'
@@ -35,21 +35,21 @@ def setup_queue():
 
     # grant permission to the SNS topic to send messages to the queue
     allow_policy = {
-      'Version': '2012-10-17',
-      'Statement': [
-        {
-          'Sid': 'AllowUnidataToSendMessages',
-          'Effect': 'Allow',
-          'Principal': '*',
-          'Action': 'SQS:SendMessage',
-          'Resource': queue.attributes['QueueArn'],
-          'Condition': {
-            'ArnEquals': {
-              'aws:SourceArn': SNS_TOPIC_ARN
+        'Version': '2012-10-17',
+        'Statement': [
+            {
+                'Sid': 'AllowUnidataToSendMessages',
+                'Effect': 'Allow',
+                'Principal': '*',
+                'Action': 'SQS:SendMessage',
+                'Resource': queue.attributes['QueueArn'],
+                'Condition': {
+                    'ArnEquals': {
+                        'aws:SourceArn': SNS_TOPIC_ARN
+                    }
+                }
             }
-          }
-        }
-      ]
+        ]
     }
     queue.set_attributes(Attributes={'Policy': json.dumps(allow_policy)})
 
@@ -104,8 +104,16 @@ def read_messages(queue):
             # TODO: Delete handled messages from the queue
 
 
-if __name__ == '__main__':
+def main():
+    """
+    Make sure the queue is setup and process messages
+    """
     queue = is_queue_created()
     if queue is None:
         queue = setup_queue()
     read_messages(queue)
+
+
+if __name__ == '__main__':
+    main()
+
