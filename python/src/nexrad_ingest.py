@@ -2,7 +2,7 @@ import json
 import boto3
 
 # TODO: Change queue name
-QUEUE_NAME = '-incoming-radar'
+QUEUE_NAME = 'YOURUSERNAMEHERE-incoming-radar'
 SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:684042711724:NewNEXRADLevel2ObjectFilterable'
 
 
@@ -31,6 +31,7 @@ def setup_queue():
     sqs = boto3.client('sqs')
     queue_url = None
     # TODO: create the queue and set 'queue_url' to the new queue's URL
+    # http://boto3.readthedocs.io/en/latest/reference/services/sqs.html?highlight=sqs#SQS.Client.create_queue
     queue = boto3.resource('sqs').Queue(queue_url)
 
     # grant permission to the SNS topic to send messages to the queue
@@ -83,6 +84,7 @@ def read_messages(queue):
     while True:
         messages = None
         # TODO: read messages from the queue
+        # http://boto3.readthedocs.io/en/latest/reference/services/sqs.html#SQS.Queue.receive_messages
         if messages is not None:
             handled_messages = []
             for message in messages:
@@ -94,6 +96,7 @@ def read_messages(queue):
                 key = details['Key']
                 file = '/tmp/' + key.replace('/', '-')
                 # TODO: Download the object from S3 and save to a file
+                # http://boto3.readthedocs.io/en/latest/reference/services/s3.html#S3.Client.download_file
                 print('downloaded ' + file)
 
                 # add to list of handled messages
@@ -102,6 +105,7 @@ def read_messages(queue):
             # delete handled messages
             print('deleting ' + str(len(handled_messages)) + ' messages')
             # TODO: Delete handled messages from the queue
+            # http://boto3.readthedocs.io/en/latest/reference/services/sqs.html#SQS.Queue.delete_messages
 
 
 def main():
