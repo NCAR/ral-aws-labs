@@ -34,6 +34,7 @@ def setup_queue():
     # http://boto3.readthedocs.io/en/latest/reference/services/sqs.html?highlight=sqs#SQS.Client.create_queue
     queue = boto3.resource('sqs').Queue(queue_url)
 
+    # TODO: Review the subscription filter policy
     # grant permission to the SNS topic to send messages to the queue
     allow_policy = {
         'Version': '2012-10-17',
@@ -54,10 +55,14 @@ def setup_queue():
     }
     queue.set_attributes(Attributes={'Policy': json.dumps(allow_policy)})
 
+    # TODO: Review SNS subscription and filter policy.
+    # TODO:   Note: Unidata put their SNS topic in region us-east-1 (Virginia),
+    # TODO:         so our client must retrieve the resource from that region.
     # subscribe to the SNS topic
     topic = boto3.Session(region_name='us-east-1').resource('sns').Topic(SNS_TOPIC_ARN)
     subscription = topic.subscribe(Protocol='sqs', Endpoint=queue.attributes['QueueArn'])
 
+    # TODO: Add your favorite radar sites
     # filter the subscription for only the sites we want
     filter_policy = {
         'SiteID': ['KLWX', 'KABQ']
@@ -120,4 +125,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
