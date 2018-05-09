@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Serverless Forecasts</title>
+    <style>
+        body
+        {
+            font-family: "Helvetica Neue", sans-serif;
+        }
+        input
+        {
+            font-family: "Helvetica Neue", sans-serif;
+            padding:5px;
+            border: 1px solid #444;
+            width:80%;
+            margin: 10px auto 10px 5%;
+        }
+        .newForecast
+        {
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding:10px;
+            margin:10px auto 10px auto;
+            width: 70%;
+        }
+        .button
+        {
+            margin:auto;
+            background:orange;
+            max-width:15%;
+            text-align:center;
+            padding:10px;
+            border-radius:10px;
+            border: 1px solid #444;
+        }
+        .forecastList
+        {
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding:10px;
+            margin:10px auto 10px auto;
+            width: 70%;
+        }
+    </style>
+</head>
+<body onload="init()">
+    <div class="newForecast">
+        Submit a forecast:<br/>
+        <input type="text" id="forecast">
+        <div class="button" onclick="submitForecast()">Submit</div>
+    </div>
+    <div id="forecastList" class="forecastList"></div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    //TODO: Change the endpoint to point to your API Gateway
+    var endpoint = 'https://d7jby359nl.execute-api.us-east-2.amazonaws.com/v1/forecast'
+    var init = function()
+    {
+        loadForecasts();
+    };
+
+    var submitForecast = function()
+    {
+        var body = {};
+        body.forecast = $('#forecast').val()
+
+        $.ajax(
+            {
+                url: endpoint,
+                method: 'POST',
+                data: JSON.stringify(body),
+                success: submitForecastSuccess,
+                error: submitForecastError
+            }
+        );
+    };
+
+
+    var submitForecastSuccess = function(response)
+    {
+        if(response.success === false)
+        {
+            alert('Error: ' + response.message);
+            return;
+        }
+        else
+        {
+            $('#forecast').val('');
+            loadForecasts();
+        }
+    };
+
+
+    var submitForecastError = function(response)
+    {
+        alert('Error sending the forecast to the endpoint');
+    };
+
+
+    var loadForecasts = function()
+    {
+        $.ajax(
+            {
+                url: endpoint,
+                method: 'GET',
+                success: loadForecastsSuccess,
+                error: loadForecastsError
+            }
+        );
+    };
+
+
+    var loadForecastsSuccess = function(response)
+    {
+        if(response.success === false)
+        {
+            loadForecastsError(response);
+            return;
+        }
+        var fcstList = $('#forecastList');
+        var content = '<ul>';
+        for(var i = 0; i < response.forecasts.length; i++)
+        {
+            var fcst = response.forecasts[i];
+            var text = fcst.forecast;
+            var date = new Date(fcst.datetimeMs);
+
+
+            content += ('<li>' + date + ' ' + text + '</li>');
+        }
+        $('#forecastList').html(content + '</ul>');
+    };
+
+
+    var loadForecastsError = function(response)
+    {
+        alert('Error contacting endpoint');
+    };
+</script>
+</html>
