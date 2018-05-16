@@ -1,0 +1,1 @@
+aws cloudformation create-stack --stack-name ${user} --template-body file://aws-ec2-sample.json --parameters ParameterKey=KeyName,ParameterValue=uae
